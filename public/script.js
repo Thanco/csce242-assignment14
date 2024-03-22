@@ -40,12 +40,11 @@ class Craft {
         `;
     }
 
-
 }
 
 const numColumns = 4;
 
-function getQuarterOfArray(array, input) {
+const getQuarterOfArray = (array, input) => {
     const quarterSize = Math.floor(array.length / numColumns);
     const startIndex = input * quarterSize;
     const endIndex = startIndex + quarterSize;
@@ -61,6 +60,35 @@ function getQuarterOfArray(array, input) {
     return quarter;
 }
 
+const buildColumns = (crafts) => {
+    for (let i = 0; i < numColumns; i++) {
+        const section = document.createElement('section');
+        section.classList.add('quarter');
+        const quarterCrafts = getQuarterOfArray(crafts, i);
+        buildColumn(quarterCrafts, section);
+        document.getElementById("crafts").appendChild(section);
+    }
+}
+
+const buildColumn = (quarterCrafts, section) => {
+    quarterCrafts.forEach(craft => {
+        const article = document.createElement('article');
+        article.innerHTML = craft.imageDisplay;
+        article.addEventListener('click', () => {
+            const modal = document.createElement('div');
+            modal.classList.add('modal');
+
+            modal.innerHTML = craft.modalDisplay;
+            const close = modal.querySelector('.close');
+            close.addEventListener('click', () => {
+                modal.remove();
+            });
+            document.body.appendChild(modal);
+        });
+
+        section.appendChild(article);
+    });
+}
 
 fetch('/api/crafts')
     .then(response => response.json())
@@ -70,33 +98,7 @@ fetch('/api/crafts')
             const newCraft = new Craft(craftJson.name, craftJson.image, craftJson.description, craftJson.supplies);
             crafts.push(newCraft);
         });
-        console.log(crafts.length);
-        for (let i = 0; i < numColumns; i++) {
-            const section = document.createElement('section');
-            section.classList.add('quarter');
-            const quarterCrafts = getQuarterOfArray(crafts, i);
-            console.log(quarterCrafts.length);
-            quarterCrafts.forEach(craft => {
-                craft = craft;
-                const article = document.createElement('article');
-                article.innerHTML = craft.imageDisplay;
-                article.addEventListener('click', () => {
-                    const modal = document.createElement('div');
-                    modal.classList.add('modal');
-
-                    modal.innerHTML = craft.modalDisplay;
-                    const close = modal.querySelector('.close');
-                    close.addEventListener('click', () => {
-                        modal.remove();
-                    });
-                    document.body.appendChild(modal);
-                });
-
-                section.appendChild(article);
-            });
-            document.getElementById("crafts").appendChild(section);
-        }
-
+        buildColumns(crafts);
     })
     .catch(error => {
         console.error('Error:', error);
